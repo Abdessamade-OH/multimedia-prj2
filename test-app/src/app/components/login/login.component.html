@@ -1,0 +1,37 @@
+<!-- src/app/login/login.component.html -->
+<div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <h2>Login</h2>
+        <form (ngSubmit)="login()">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" [(ngModel)]="username" name="username" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" [(ngModel)]="password" name="password" class="form-control" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Login</button>
+          <div *ngIf="errorMessage" class="alert alert-danger mt-2">{{ errorMessage }}</div>
+        </form>
+      </div>
+  
+      <div class="col-md-6">
+        <h2>Register</h2>
+        <form (ngSubmit)="register()">
+          <div class="form-group">
+            <label for="registerUsername">Username</label>
+            <input type="text" id="registerUsername" [(ngModel)]="registerUsername" name="registerUsername" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="registerPassword">Password</label>
+            <input type="password" id="registerPassword" [(ngModel)]="registerPassword" name="registerPassword" class="form-control" required />
+          </div>
+          <button type="submit" class="btn btn-success">Register</button>
+          <div *ngIf="registerErrorMessage" class="alert alert-danger mt-2">{{ registerErrorMessage }}</div>
+        </form>
+      </div>
+    </div>
+  </div>
+  

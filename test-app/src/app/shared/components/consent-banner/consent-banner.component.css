@@ -1,0 +1,10 @@
+.fixed-bottom {
+    z-index: 1050; /* Ensures the banner appears above other content */
+    margin-bottom: 0; /* Remove any default margin */
+  }
+  
+  .alert {
+    margin-bottom: 0; /* Ensure no margin on bottom */
+    border-radius: 0; /* Optional: removes border radius for a sharper look */
+  }
+  

@@ -1,0 +1,30 @@
+
+<section class="my-3">
+    <div class="container">
+        <div class="btns d-flex flex-column gap-3">
+            <button class="btn btn-primary" (click)="setCookie()">Set Cookie</button>
+            <button class="btn btn-secondary" (click)="getCookie()">Get Cookie</button>
+            <button class="btn btn-danger" (click)="deleteCookie()">Delete Cookie</button>
+        </div>
+    </div>
+</section>
+
+<!-- src/app/preferences/preferences.component.html -->
+<div class="container">
+    <h2>Set Preferences</h2>
+    <form (ngSubmit)="submitPreferences()">
+      <div class="form-group">
+        <label for="theme">Theme</label>
+        <select id="theme" [(ngModel)]="theme" name="theme" class="form-control">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary my-2">Set Preferences</button>
+    </form>
+  </div>
+  
+
+<app-consent-banner></app-consent-banner>
+
+

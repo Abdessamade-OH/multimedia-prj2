@@ -1,0 +1,548 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "My Flask API",
+        "description": "A simple API"
+    },
+    "host": "127.0.0.1:5000",
+    "basePath": "/",
+    "paths": {
+        "/transform/{image_name}": {
+            "post": {
+              "summary": "Transform an image with specified operations",
+              "description": "Apply various transformations like crop, resize, and rotate to an uploaded image. The transformations are defined in the request body.",
+              "parameters": [
+                {
+                  "name": "image_name",
+                  "in": "path",
+                  "required": true,
+                  "description": "Name of the image to transform",
+                  "type": "string"
+                },
+                {
+                  "name": "category",
+                  "in": "query",
+                  "required": true,
+                  "description": "Category of the image",
+                  "type": "string",
+                  "enum": ["aGrass", "bField", "cIndustry", "dRiverLake", "eForest", "fResident", "gParking"]
+                },
+                {
+                  "name": "body",
+                  "in": "body",
+                  "required": true,
+                  "description": "JSON object specifying the transformations and their parameters",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "transformations": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": ["crop", "resize", "rotate"],
+                          "description": "List of transformations to apply"
+                        }
+                      },
+                      "crop_coordinates": {
+                        "type": "object",
+                        "properties": {
+                          "x": {"type": "integer", "default": 0},
+                          "y": {"type": "integer", "default": 0},
+                          "width": {"type": "integer"},
+                          "height": {"type": "integer"}
+                        },
+                        "description": "Coordinates for cropping (required if 'crop' is specified)"
+                      },
+                      "resize_dimensions": {
+                        "type": "object",
+                        "properties": {
+                          "width": {"type": "integer"},
+                          "height": {"type": "integer"}
+                        },
+                        "description": "Dimensions for resizing (required if 'resize' is specified)"
+                      },
+                      "rotation_angle": {
+                        "type": "integer",
+                        "description": "Angle to rotate the image (required if 'rotate' is specified)"
+                      }
+                    },
+                    "required": ["transformations"]
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Image transformed successfully",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {"type": "string", "example": "success"},
+                      "transformed_image_url": {"type": "string", "example": "http://example.com/static/transformed/image.jpg"},
+                      "transformation_details": {
+                        "type": "object",
+                        "example": {
+                          "crop": {"x": 10, "y": 20, "width": 100, "height": 150},
+                          "resize": {"width": 300, "height": 200},
+                          "rotate": {"angle": 45}
+                        }
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "description": "Invalid request data",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {"type": "string", "example": "error"},
+                      "message": {"type": "string", "example": "No transformations specified"}
+                    }
+                  }
+                },
+                "404": {
+                  "description": "Image not found",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {"type": "string", "example": "error"},
+                      "message": {"type": "string", "example": "Image not found in the specified category"}
+                    }
+                  }
+                },
+                "500": {
+                  "description": "Server error",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {"type": "string", "example": "error"},
+                      "message": {"type": "string", "example": "Internal server error"}
+                    }
+                  }
+                }
+              }
+            }
+          },
+        "/extract_features/{image_name}": {
+            "post": {
+                "summary": "Extract features from a specific image and find similar images in the RSSCN7 dataset",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "image_name",
+                        "type": "string",
+                        "description": "Name of the image to extract features from",
+                        "required": true
+                    },
+                    {
+                        "in": "formData",
+                        "name": "category",
+                        "type": "string",
+                        "enum": ["aGrass", "bField", "cIndustry", "dRiverLake", "eForest", "fResident", "gParking"],
+                        "description": "Category of the image",
+                        "required": true
+                    },
+                    {
+                        "in": "formData",
+                        "name": "k",
+                        "type": "integer",
+                        "description": "Number of similar images to return (default: 10)",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Features extracted successfully along with similar images",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": { "type": "string" },
+                                "image_name": { "type": "string" },
+                                "category": { "type": "string" },
+                                "features": {
+                                    "type": "object",
+                                    "description": "Extracted image features"
+                                },
+                                "query_image_url": { "type": "string" },
+                                "similar_images": {
+                                    "type": "array",
+                                    "description": "List of similar images found in the RSSCN7 dataset",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "image_path": { "type": "string" },
+                                            "category": { "type": "string" },
+                                            "similarity_score": { "type": "number" },
+                                            "image_url": { "type": "string" }
+                                        }
+                                    }
+                                },
+                                "total_images_processed": { "type": "integer" }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or missing category"
+                    },
+                    "404": {
+                        "description": "Image not found in the specified category"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/relevance-feedback-search": {
+            "post": {
+                "summary": "Perform image similarity search with relevance feedback using Query-point movement",
+                "description": "This endpoint performs an image similarity search with relevance feedback.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "JSON object containing image search parameters",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "The name of the image to use for the query."
+                                },
+                                "category": {
+                                    "type": "string",
+                                    "enum": ["aGrass", "bField", "cIndustry", "dRiverLake", "eForest", "fResident", "gParking"],
+                                    "description": "The category of the image."
+                                },
+                                "relevant_images": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "A list of relevant images to improve search accuracy."
+                                },
+                                "non_relevant_images": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "A list of non-relevant images to refine the query."
+                                }
+                            },
+                            "required": ["name", "category"]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "k",
+                        "type": "integer",
+                        "description": "The number of similar images to return. Default is 10.",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful relevance feedback search",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "example": "success"
+                                },
+                                "query_image": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "string",
+                                            "example": "transformed/aGrass/sample_image.jpg"
+                                        },
+                                        "category": {
+                                            "type": "string",
+                                            "example": "aGrass"
+                                        }
+                                    }
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "image_path": {
+                                                "type": "string",
+                                                "example": "transformed/aGrass/similar_image_1.jpg"
+                                            },
+                                            "category": {
+                                                "type": "string",
+                                                "example": "aGrass"
+                                            },
+                                            "similarity_score": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 0.95
+                                            }
+                                        }
+                                    }
+                                },
+                                "total_results": {
+                                    "type": "integer",
+                                    "example": 100
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - Missing or invalid parameters"
+                    },
+                    "404": {
+                        "description": "Not found - Query image not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/extract_features/batch": {
+            "post": {
+                "summary": "Extract features from multiple images in a batch and find similar images in the RSSCN7 dataset",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "images",
+                        "description": "List of images to extract features from",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Name of the image to extract features from"
+                                    },
+                                    "category": {
+                                        "type": "string",
+                                        "enum": ["aGrass", "bField", "cIndustry", "dRiverLake", "eForest", "fResident", "gParking"],
+                                        "description": "Category of the image"
+                                    }
+                                },
+                                "required": ["name", "category"]
+                            }
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "k",
+                        "type": "integer",
+                        "description": "Number of similar images to return (default: 10)",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Batch feature extraction completed successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": { "type": "string" },
+                                "batch_results": {
+                                    "type": "array",
+                                    "description": "Results for each image in the batch",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "status": { "type": "string" },
+                                            "image_name": { "type": "string" },
+                                            "category": { "type": "string" },
+                                            "features": {
+                                                "type": "object",
+                                                "description": "Extracted image features"
+                                            },
+                                            "query_image_url": { "type": "string" },
+                                            "similar_images": {
+                                                "type": "array",
+                                                "description": "List of similar images found in the RSSCN7 dataset",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "image_path": { "type": "string" },
+                                                        "category": { "type": "string" },
+                                                        "similarity_score": { "type": "number" },
+                                                        "image_url": { "type": "string" }
+                                                    }
+                                                }
+                                            },
+                                            "total_images_processed": { "type": "integer" }
+                                        }
+                                    }
+                                },
+                                "total_processed": { "type": "integer" }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or missing image data"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/relevance-feedback-search/batch": {
+            "post": {
+                "summary": "Process multiple images in a batch using Query Point Movement (QPM) relevance feedback method",
+                "description": "This endpoint processes a batch of images using the QPM relevance feedback method to update feature vectors and retrieve similar images.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "JSON object containing a list of images with their metadata and relevance feedback.",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "The name of the image file."
+                                    },
+                                    "category": {
+                                        "type": "string",
+                                        "description": "The category of the image (e.g., 'aGrass', 'bField', etc.).",
+                                        "enum": [
+                                            "aGrass",
+                                            "bField",
+                                            "cIndustry",
+                                            "dRiverLake",
+                                            "eForest",
+                                            "fResident",
+                                            "gParking"
+                                        ]
+                                    },
+                                    "relevant_images": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "description": "List of file paths for relevant images."
+                                    },
+                                    "non_relevant_images": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "description": "List of file paths for non-relevant images."
+                                    }
+                                },
+                                "required": ["name", "category"]
+                            }
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "k",
+                        "type": "integer",
+                        "description": "Number of similar images to return. Default is 10.",
+                        "required": false
+                    },
+                    {
+                        "in": "query",
+                        "name": "alpha",
+                        "type": "number",
+                        "description": "Weight for the original query features. Default is 1.0.",
+                        "required": false
+                    },
+                    {
+                        "in": "query",
+                        "name": "beta",
+                        "type": "number",
+                        "description": "Weight for the relevant images. Default is 0.65.",
+                        "required": false
+                    },
+                    {
+                        "in": "query",
+                        "name": "gamma",
+                        "type": "number",
+                        "description": "Weight for the non-relevant images. Default is 0.35.",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful batch processing results.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string"
+                                },
+                                "batch_results": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "status": {
+                                                "type": "string"
+                                            },
+                                            "image_name": {
+                                                "type": "string"
+                                            },
+                                            "category": {
+                                                "type": "string"
+                                            },
+                                            "query_image_url": {
+                                                "type": "string"
+                                            },
+                                            "features": {
+                                                "type": "object"
+                                            },
+                                            "similar_images": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "image_path": {
+                                                            "type": "string"
+                                                        },
+                                                        "category": {
+                                                            "type": "string"
+                                                        },
+                                                        "similarity_score": {
+                                                            "type": "number"
+                                                        },
+                                                        "image_url": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "total_images_processed": {
+                                                "type": "integer"
+                                            },
+                                            "feedback_applied": {
+                                                "type": "boolean"
+                                            }
+                                        }
+                                    }
+                                },
+                                "total_processed": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input data or missing required fields."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                }
+            }
+        }
+    }
+}

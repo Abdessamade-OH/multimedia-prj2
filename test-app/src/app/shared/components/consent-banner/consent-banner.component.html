@@ -1,0 +1,33 @@
+
+
+
+  <div class="alert alert-dark text-white text-center fixed-bottom mb-0" role="alert" style="background-color: #343a40; border: none;">
+    <h4 class="alert-heading">Cookie Consent</h4>
+    <p>We use cookies to enhance your experience on our website. Please give your consent for us to use cookies:</p>
+    
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" id="necessaryCookies" checked disabled />
+      <label class="form-check-label text-white" for="necessaryCookies">Necessary Cookies (Always Enabled)</label>
+    </div>
+    
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" id="firstPartyCookies" />
+      <label class="form-check-label text-white" for="firstPartyCookies">First-Party Cookies</label>
+    </div>
+    
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" id="thirdPartyCookies" />
+      <label class="form-check-label text-white" for="thirdPartyCookies">Third-Party Cookies</label>
+    </div>
+    
+    <hr class="bg-white">
+    
+
+    <div class="d-flex flex-row gap-3 mx-auto align-items-center justify-content-center">
+      <button class="btn btn-primary" type="button" (click)="acceptCookies()">Accept</button>
+      <button class="btn btn-secondary" type="button" (click)="rejectCookies()">Reject All</button>
+  </div>
+  
+  </div>
+  
+  

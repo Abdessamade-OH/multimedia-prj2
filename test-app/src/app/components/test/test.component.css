@@ -1,0 +1,6 @@
+.btns{
+    flex:auto;
+    flex-direction: column;
+    align-items: center;
+    
+}

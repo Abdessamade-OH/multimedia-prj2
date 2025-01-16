@@ -1,0 +1,341 @@
+<section>
+  <div class="container-fluid">
+    <!-- Simple Search Section -->
+    <div class="row">
+      <div class="col-12">
+        <h3>Simple Search</h3>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="border border-radius-2 d-flex flex-row justify-content-center gap-4 align-items-center py-4 px-2">
+          <div class="d-flex flex-row justify-content-between align-items-center gap-2">
+            <input
+              type="text"
+              [(ngModel)]="imageName"
+              placeholder="Enter image name"
+              class="form-control"
+            />
+            <button (click)="getImageByName(imageName)" class="btn btn-primary">Search</button>
+            <input
+              type="number"
+              [(ngModel)]="numberK"
+              placeholder="Enter number K"
+              class="form-control"
+              [value]="numberK || 10"
+            />
+            <button class="btn btn-primary" (click)="extractFeatures()">Extract Features</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center my-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Query Image and Features -->
+    <div *ngIf="imageUrl && !isLoading" class="mt-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="row g-0">
+              <!-- Image Column -->
+              <div class="col-md-4">
+                <div class="position-relative h-100">
+                  <img [src]="imageUrl" 
+                      alt="Query Image" 
+                      class="img-fluid rounded-start h-100 w-100 object-fit-cover" 
+                      style="max-height: 400px;" />
+                </div>
+              </div>
+              
+              <!-- Image Info Column -->
+              <div class="col-md-8">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <h4 class="card-title mb-1">{{ imageName }}</h4>
+                      <h6 class="card-subtitle mb-3 text-muted">Category: {{ imageCategory | removeFirstLetter }}</h6>
+                    </div>
+                    <span class="badge bg-primary rounded-pill">Query Image</span>
+                  </div>
+                  
+                  <!-- Tabs for Different Feature Types -->
+                  <ul class="nav nav-tabs" id="featureTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link active" 
+                              id="colors-tab" 
+                              data-bs-toggle="tab" 
+                              data-bs-target="#colors" 
+                              type="button" 
+                              role="tab">
+                        Color Analysis
+                      </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" 
+                              id="texture-tab" 
+                              data-bs-toggle="tab" 
+                              data-bs-target="#texture" 
+                              type="button" 
+                              role="tab">
+                        Texture Features
+                      </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" 
+                              id="shape-tab" 
+                              data-bs-toggle="tab" 
+                              data-bs-target="#shape" 
+                              type="button" 
+                              role="tab">
+                        Shape Features
+                      </button>
+                    </li>
+                  </ul>
+                  
+                 <!-- Tab Content -->
+                  <div class="tab-content mt-3" id="featureTabsContent">
+                    <!-- Colors Tab -->
+                    <div class="tab-pane fade show active" id="colors" role="tabpanel">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <h6 class="mb-3">Color Distribution</h6>
+                          <div class="feature-chart">
+                            <!-- Simple color distribution display -->
+                            <div class="d-flex flex-column gap-2">
+                              <div *ngFor="let item of ['red', 'green', 'blue']" class="d-flex flex-column">
+                                <small class="text-capitalize">{{item}}</small>
+                                <div class="d-flex gap-1">
+                                  <div *ngFor="let value of features?.color_histogram?.[item]; let i = index"
+                                      class="flex-grow-1"
+                                      [style.background-color]="item"
+                                      [style.opacity]="value"
+                                      style="height: 20px;">
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <h6 class="mb-3">Dominant Colors</h6>
+                          <div class="d-flex flex-wrap gap-2">
+                            <div *ngFor="let color of features?.dominant_colors?.colors; let i = index" 
+                                class="text-center">
+                              <div [style.background-color]="getRGBString(color)"
+                                  style="width: 50px; height: 50px; border-radius: 8px;">
+                              </div>
+                              <small class="d-block text-center mt-1">
+                                {{ (features?.dominant_colors?.percentages[i] * 100).toFixed(1) }}%
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Texture Tab -->
+                    <div class="tab-pane fade" id="texture" role="tabpanel">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <h6 class="mb-3">GLCM Features</h6>
+                          <div class="table-responsive">
+                            <table class="table table-sm">
+                              <thead>
+                                <tr>
+                                  <th>Feature</th>
+                                  <th>Values</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr *ngFor="let feature of ['contrast', 'dissimilarity', 'homogeneity', 'energy', 'correlation']">
+                                  <td class="text-capitalize">{{feature}}</td>
+                                  <td>
+                                    <small>{{features?.glcm_features?.[feature]?.join(', ')}}</small>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <h6 class="mb-3">LBP Histogram</h6>
+                          <div class="d-flex gap-1">
+                            <div *ngFor="let value of features?.lbp_features?.histogram"
+                                class="flex-grow-1"
+                                style="background-color: #007bff;"
+                                [style.height.px]="value * 100">
+                            </div>
+                          </div>
+                          <small class="text-muted">
+                            Radius: {{features?.lbp_features?.parameters?.radius}},
+                            Points: {{features?.lbp_features?.parameters?.n_points}}
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Shape Tab -->
+                    <div class="tab-pane fade" id="shape" role="tabpanel">
+                      <div class="row">
+                        <div class="col-12">
+                          <h6 class="mb-3">Hu Moments</h6>
+                          <div class="table-responsive">
+                            <table class="table table-sm">
+                              <thead>
+                                <tr>
+                                  <th>Moment</th>
+                                  <th>Value</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr *ngFor="let moment of features?.hu_moments?.moments; let i = index">
+                                  <td>{{features?.hu_moments?.names[i]}}</td>
+                                  <td>{{moment.toExponential(3)}}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Gabor Features Tab -->
+                <div class="tab-pane fade" id="gabor" role="tabpanel">
+                  <h6>Gabor Features</h6>
+                  <div class="d-flex flex-wrap gap-1">
+                    <span *ngFor="let feature of features?.gabor_features?.features"
+                          class="badge bg-secondary">
+                      {{ feature.toFixed(3) }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- HOG Features Tab -->
+                <div class="tab-pane fade" id="hog" role="tabpanel">
+                  <h6>HOG Features</h6>
+                  <div class="d-flex flex-wrap gap-1">
+                    <span *ngFor="let feature of features?.hog_features?.features"
+                          class="badge bg-info">
+                      {{ feature.toFixed(3) }}
+                    </span>
+                  </div>
+                </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Initial Similar Images Section -->
+    <div *ngIf="similarImages.length > 0 && !isLoading" class="my-5">
+      <h4>Similar Images (Initial Search)</h4>
+      <div class="container-fluid">
+        <div class="row g-4">
+          <div
+            class="col-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2"
+            *ngFor="let image of similarImages"
+          >
+            <div class="position-relative">
+              <img
+                [src]="image.url"
+                alt="Image"
+                class="img-thumbnail selectable-image"
+                [ngClass]="{'border border-5 border-primary rounded-4 border-danger': image.isSelected}"
+                (click)="toggleSelection(image)"
+              />
+            </div>
+            <div>
+              <p class="mb-1">
+                <strong>{{ extractImageName(image.image_path) }}</strong>
+              </p>
+              <p class="mb-1">
+                <strong>Category:</strong> {{ image.category | removeFirstLetter }}
+              </p>
+              <p class="mb-0">
+                Similarity Score: <span class="badge bg-primary">{{ image.similarity_score | number:'1.2-2' }}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Relevance Search Parameters 
+    <div *ngIf="relevantSearch" class="my-4">
+      <h4>Relevance Search Parameters</h4>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <input
+            type="number"
+            [(ngModel)]="alpha"
+            placeholder="Enter Alpha"
+            class="form-control"
+          />
+        </div>
+        <div class="col-md-4">
+          <input
+            type="number"
+            [(ngModel)]="beta"
+            placeholder="Enter Beta"
+            class="form-control"
+          />
+        </div>
+        <div class="col-md-4">
+          <input
+            type="number"
+            [(ngModel)]="gamma"
+            placeholder="Enter Gamma"
+            class="form-control"
+          />
+        </div>
+      </div>
+    </div>-->
+
+    <!-- Relevance Search Button -->
+    <div *ngIf="similarImages.length > 0 && !isLoading" class="my-3 d-flex justify-content-end">
+      <button class="btn btn-warning" (click)="performRelevanceSearch()">Relevance Search</button>
+    </div>
+
+    <!-- Relevance Search Results Section -->
+    <div *ngIf="showRelevanceResults && relevanceSearchResults.length > 0 && !isLoading" class="my-5">
+      <h4>Relevance Search Results</h4>
+      <div class="container-fluid">
+        <div class="row g-4">
+          <div
+            class="col-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2"
+            *ngFor="let image of relevanceSearchResults"
+          >
+            <div class="position-relative">
+              <img
+                [src]="image.url"
+                alt="Image"
+                class="img-thumbnail"
+                class="img-fluid"
+              />
+            </div>
+            <div>
+              <p class="mb-1">
+                <strong>{{ extractImageName(image.image_path) }}</strong>
+              </p>
+              <p class="mb-1">
+                <strong>Category:</strong> {{ image.category | removeFirstLetter }}
+              </p>
+              <p class="mb-0">
+                Similarity Score: <span class="badge bg-primary">{{ image.similarity_score | number:'1.2-2' }}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

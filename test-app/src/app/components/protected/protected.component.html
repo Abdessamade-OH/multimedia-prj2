@@ -1,0 +1,9 @@
+<!-- src/app/protected/protected.component.html -->
+<div class="container">
+    <h2>Protected Content</h2>
+    <div *ngIf="userInfo">
+      <p>Welcome, {{ userInfo.username }}!</p>
+      <p>Your protected data: {{ userInfo.data }}</p>
+    </div>
+  </div>
+  

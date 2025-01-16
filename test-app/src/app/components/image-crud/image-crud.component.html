@@ -1,0 +1,142 @@
+<section>
+  <div class="container my-5">
+    <div class="row my-3">
+      <div class="col-12">
+        <h1 class="text-center">Upload Your Images!</h1>
+      </div>
+    </div>
+    <div class="row">
+      <!-- Upload Image Form -->
+      <div class="col-12">
+        <div class="border p-5">
+          <h5 class="mb-5 text-center">Upload Images</h5>
+          <form (ngSubmit)="onUploadImage()" class="d-flex flex-column gap-3 justify-content-center align-items-start" enctype="multipart/form-data">
+
+            <!-- Image Category -->
+            <div class="form-group w-100">
+              <label for="image-category">Image Category</label>
+              <select [(ngModel)]="imageCategory" name="category" id="image-category" class="form-control" required>
+                <option value="Alabastron">Alabastron</option>
+                <option value="Amphora">Amphora</option>
+                <option value="Amphoriskos">Amphoriskos</option>
+                <option value="Aryballos">Aryballos</option>
+                <option value="Askos">Askos</option>
+                <option value="Bowl">Bowl</option>
+                <option value="Cup">Cup</option>
+                <option value="Dinos">Dinos</option>
+                <option value="Epichysis">Epichysis</option>
+                <option value="Exaleiptron">Exaleiptron</option>
+                <option value="Skyphos">Skyphos</option>
+                <option value="Hydria">Hydria</option>
+                <option value="Kalathos">Kalathos</option>
+                <option value="Kantharos">Kantharos</option>
+                <option value="Kernos">Kernos</option>
+                <option value="Krater">Krater</option>
+                <option value="Kyathos">Kyathos</option>
+                <option value="Kylix">Kylix</option>
+                <option value="Lagynos">Lagynos</option>
+                <option value="Lebes">Lebes</option>
+                <option value="Lekane">Lekane</option>
+                <option value="Lekythos">Lekythos</option>
+                <option value="Loutrophoros">Loutrophoros</option>
+                <option value="Lydion">Lydion</option>
+                <option value="Mastos">Mastos</option>
+                <option value="Mug">Mug</option>
+                <option value="Nestoris">Nestoris</option>
+                <option value="Oinochoe">Oinochoe</option>
+                <option value="Pelike">Pelike</option>
+                <option value="Pithos">Pithos</option>
+                <option value="Plemochoe">Plemochoe</option>
+                <option value="Psykter">Psykter</option>
+                <option value="Pyxis">Pyxis</option>
+                <option value="Other">Other</option>
+                <option value="Modern-Bottle">Modern-Bottle</option>
+                <option value="Modern-Vase">Modern-Vase</option>
+                <option value="Modern-Glass">Modern-Glass</option>
+                <option value="Modern-Bowl">Modern-Bowl</option>
+                <option value="Modern-Cup">Modern-Cup</option>
+                <option value="Modern-Mug">Modern-Mug</option>
+                <option value="Modern-Urn">Modern-Urn</option>
+                <option value="Modern-Pot">Modern-Pot</option>
+                <option value="Pithoeidi">Pithoeidi</option>
+                <option value="Native American - Jar">Native American - Jar</option>
+                <option value="Native American - Effigy">Native American - Effigy</option>
+                <option value="Native American - Bowl">Native American - Bowl</option>
+                <option value="Native American - Bottle">Native American - Bottle</option>
+                <option value="Picher Shaped">Picher Shaped</option>
+                <option value="Abstract">Abstract</option>
+              </select>
+            </div>
+
+            <!-- Image File Upload -->
+            <div class="form-group w-100">
+              <label for="image-file">Select Images</label>
+              <input
+                type="file"
+                id="image-file"
+                class="form-control"
+                accept="image/*"
+                (change)="onFileChange($event)"
+                multiple
+                required
+              >
+            </div>
+
+            <!-- OBJ File Upload -->
+            <div class="form-group w-100">
+              <label for="obj-file">Select OBJ File</label>
+              <input
+                type="file"
+                id="obj-file"
+                class="form-control"
+                accept=".obj"
+                required
+              >
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">Upload</button>
+          </form>
+
+          <!-- Transform Image Button -->
+          <button *ngIf="imagePreview" class="btn btn-secondary mt-3" (click)="onTransformImage()">Transform Image</button>
+
+          <!-- Transformation Controls (unchanged) -->
+          <div *ngIf="transforming" class="mt-5">
+            <h6>Transform Image</h6>
+            <div class="container-fluid">
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <div class="image-container d-flex flex-column gap-5">
+                    <div class="d-flex flex-row gap-3">
+                      <h3>Rotation</h3>
+                      <button (click)="rotateImage('left')" class="btn btn-primary">Rotate Left</button>
+                      <button (click)="rotateImage('right')" class="btn btn-primary">Rotate Right</button>
+                    </div>
+                    <div class="d-flex flex-column gap-3">
+                      <h3>Resize</h3>
+                      <label for="resizeWidth">Width:</label>
+                      <input type="range" id="resizeWidth" min="50" max="500" [(ngModel)]="resizeWidth" class="form-range">
+                      <span>{{ resizeWidth }}px</span>
+                      <label for="resizeHeight">Height:</label>
+                      <input type="range" id="resizeHeight" min="50" max="500" [(ngModel)]="resizeHeight" class="form-range">
+                      <span>{{ resizeHeight }}px</span>
+                      <button (click)="resizeImage(resizeWidth, resizeHeight)" class="btn btn-primary">Apply Resize</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6">
+                  <div class="form-group w-100">
+                    <h6 class="mt-3">Transformed Image</h6>
+                    <img [src]="transformedImage" alt="Transformed Image" class="img-fluid rounded border mt-2" style="max-height: 300px;">
+                  </div>
+                  <button *ngIf="transformedImage" class="btn btn-success mt-3" (click)="finishTransformation()">Finish and Upload</button>
+                  <button *ngIf="transforming" class="btn btn-danger mt-3 mx-3" (click)="cancelTransformations()">Cancel Transformations</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

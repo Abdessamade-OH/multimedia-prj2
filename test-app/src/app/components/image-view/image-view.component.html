@@ -1,0 +1,62 @@
+<section>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <h3>View your Images</h3>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <div class="border border-radius-2 d-flex flex-row justify-content-center gap-4 align-items-center py-4 px-2">
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Categories
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" (click)="selectCategory('aGrass')">Grass</a></li>
+                <li><a class="dropdown-item" (click)="selectCategory('bField')">Field</a></li>
+                <li><a class="dropdown-item" (click)="selectCategory('cIndustry')">Industry</a></li>
+                <li><a class="dropdown-item" (click)="selectCategory('dRiverLake')">River Lake</a></li>
+                <li><a class="dropdown-item" (click)="selectCategory('eForest')">Forest</a></li>
+                <li><a class="dropdown-item" (click)="selectCategory('fResident')">Resident</a></li>
+                <li><a class="dropdown-item" (click)="selectCategory('gParking')">Parking</a></li>
+              </ul>
+            </div>          
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Show the selected category images -->
+    <div *ngIf="selectedCategory && categoryImages.length" class="overflow-y-auto overflow-x-hidden my-5" style="max-height: 600px;">
+      <div class="row">
+        <div class="col-12 border border-radius-2">
+          <div class="row">
+            <div class="col-12">
+              <div class="container-fluid">
+                <div class="row">
+                  <h5>Images from Category: {{ selectedCategory }}</h5>
+                </div>
+                <div class="row g-3">
+                  <div *ngFor="let image of categoryImages" class="col-lg-3 col-md-4 col-6">
+                    <div class="card">
+                      <img [src]="image.path" alt="Image" class="card-img-top img-fluid">
+                      <div class="card-body">
+                        <!-- Display the actual image name here -->
+                        <h6 class="card-title">{{ image.name }}</h6> <!-- Dynamically display the image name -->
+                        <div class="d-flex justify-content-center gap-2 align-items-center flex-wrap">
+                          <button class="btn btn-primary btn-sm" (click)="getImageById(image._id)" >Download</button>
+                          <button class="btn btn-danger btn-sm" (click)="deleteImage(image._id)">Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
